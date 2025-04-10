@@ -10,7 +10,7 @@ app.get("/health", (_, res) => {
     res.send("Server is running");
 });
 
-app.use(cors);
+app.use(cors());
 const port = 8080;
 const server = http.createServer(app);
 
@@ -29,6 +29,8 @@ io.on("connection", (socket) => {
     });
 });
 
-server.listen(port, () => {
-    console.log(`listening on *:${port}`);
+server.listen(port, "0.0.0.0", () => {
+    console.log(`Server running on http://0.0.0.0:${port}`);
+    console.log(`Access locally via http://localhost:${port}`);
+    console.log(`Access on network via http://192.168.0.100:${port}`);
 });

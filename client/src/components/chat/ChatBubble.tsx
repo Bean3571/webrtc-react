@@ -7,10 +7,13 @@ import { UserContext } from "../../context/UserContext";
 export const ChatBubble: React.FC<{ message: IMessage }> = ({ message }) => {
     const { peers } = useContext(RoomContext);
     const { userId } = useContext(UserContext);
-    const author = message.author && peers[message.author].userName;
-    const userName = author || "Anonimus";
+    
+    // Add null checks to prevent accessing properties of undefined
+    const author = message.author && peers[message.author] ? peers[message.author].userName : undefined;
+    const userName = author || "Anonymous";
     const isSelf = message.author === userId;
     const time = new Date(message.timestamp).toLocaleTimeString();
+    
     return (
         <div
             className={classNames("m-2 flex", {

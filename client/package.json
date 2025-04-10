@@ -28,7 +28,7 @@
     "start:all": "concurrently --kill-others  \"yarn start:peer\" \"yarn start:server\" \" yarn start\"",
     "start:peer": "yarn --cwd ../peerjs  dev",
     "start:server": "yarn --cwd ../server dev",
-    "start": "react-scripts start",
+    "start": "HOST=0.0.0.0 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -18,6 +18,7 @@ import {
 
 import { UserContext } from "./UserContext";
 import { IPeer } from "../types/peer";
+import { PEER_CONFIG } from "../config";
 
 interface RoomValue {
     stream?: MediaStream;
@@ -108,15 +109,20 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
     }, [userName, userId, roomId]);
 
     useEffect(() => {
-        const peer = new Peer(userId, {
-            host: "peerjs.webrtctest.online",
-            path: "/",
-        });
+        const peer = new Peer(userId, PEER_CONFIG);
         setMe(peer);
 
         try {
+            const videoDeviceId = sessionStorage.getItem("selectedVideoDevice");
+            const audioDeviceId = sessionStorage.getItem("selectedAudioDevice");
+            
+            const constraints: MediaStreamConstraints = {
+                video: videoDeviceId ? { deviceId: { exact: videoDeviceId } } : true,
+                audio: audioDeviceId ? { deviceId: { exact: audioDeviceId } } : true
+            };
+            
             navigator.mediaDevices
-                .getUserMedia({ video: true, audio: true })
+                .getUserMedia(constraints)
                 .then((stream) => {
                     setStream(stream);
                 });
@@ -130,6 +136,14 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
         ws.on("user-started-sharing", (peerId) => setScreenSharingId(peerId));
         ws.on("user-stopped-sharing", () => setScreenSharingId(""));
         ws.on("name-changed", nameChangedHandler);
+        ws.on("room-not-found", ({ roomId }) => {
+            alert(`Room ${roomId} not found!`);
+            navigate("/");
+        });
+        ws.on("room-error", ({ message }) => {
+            alert(`Error: ${message}`);
+            navigate("/");
+        });
 
         return () => {
             ws.off("room-created");
@@ -139,6 +153,8 @@ export const RoomProvider: React.FunctionComponent = ({ children }) => {
             ws.off("user-stopped-sharing");
             ws.off("user-joined");
             ws.off("name-changed");
+            ws.off("room-not-found");
+            ws.off("room-error");
             me?.disconnect();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps

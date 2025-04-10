@@ -25,25 +25,48 @@ export const roomHandler = (socket: Socket) => {
     const createRoom = () => {
         const roomId = uuidV4();
         rooms[roomId] = {};
+        chats[roomId] = [];
         socket.emit("room-created", { roomId });
-        console.log("user created the room");
+        console.log("user created the room", roomId);
     };
-    const joinRoom = ({ roomId, peerId, userName }: IJoinRoomParams) => {
-        if (!rooms[roomId]) rooms[roomId] = {};
+    const joinRoom = (params: Partial<IJoinRoomParams>) => {
+        const { roomId, peerId, userName } = params;
+
+        if (!roomId) {
+            socket.emit("room-error", { message: "Room ID is required" });
+            return;
+        }
+
+        if (!rooms[roomId]) {
+            // Room doesn't exist
+            socket.emit("room-not-found", { roomId });
+            return;
+        }
+
         if (!chats[roomId]) chats[roomId] = [];
         socket.emit("get-messages", chats[roomId]);
-        console.log("user joined the room", roomId, peerId, userName);
-        rooms[roomId][peerId] = { peerId, userName };
-        socket.join(roomId);
-        socket.to(roomId).emit("user-joined", { peerId, userName });
+
+        // Handle case where peerId and userName are not provided
+        if (peerId && userName) {
+            console.log("user joined the room", roomId, peerId, userName);
+            rooms[roomId][peerId] = { peerId, userName };
+            socket.join(roomId);
+            socket.to(roomId).emit("user-joined", { peerId, userName });
+        } else {
+            console.log("user requesting to join room", roomId);
+            socket.join(roomId);
+        }
+
         socket.emit("get-users", {
             roomId,
             participants: rooms[roomId],
         });
 
         socket.on("disconnect", () => {
-            console.log("user left the room", peerId);
-            leaveRoom({ roomId, peerId });
+            if (peerId) {
+                console.log("user left the room", peerId);
+                leaveRoom({ roomId, peerId });
+            }
         });
     };
 
