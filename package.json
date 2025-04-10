@@ -1,0 +1,16 @@
+{
+  "name": "webrtc-react-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebRTC application with React frontend",
+  "scripts": {
+    "start": "cd client && yarn start:all",
+    "install:all": "yarn install && cd client && yarn install && cd ../server && yarn install && cd ../peerjs && yarn install",
+    "build": "cd client && yarn build",
+    "generate-certs": "node generate-certs.js",
+    "setup:https": "yarn generate-certs && yarn install:all",
+    "serve-cert": "node serve-cert.js"
+  },
+  "author": "",
+  "license": "MIT"
+} 

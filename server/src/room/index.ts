@@ -27,6 +27,7 @@ export const roomHandler = (socket: Socket) => {
         rooms[roomId] = {};
         chats[roomId] = [];
         socket.emit("room-created", { roomId });
+        // tslint:disable-next-line:no-console
         console.log("user created the room", roomId);
     };
     const joinRoom = (params: Partial<IJoinRoomParams>) => {
@@ -48,11 +49,13 @@ export const roomHandler = (socket: Socket) => {
 
         // Handle case where peerId and userName are not provided
         if (peerId && userName) {
+            // tslint:disable-next-line:no-console
             console.log("user joined the room", roomId, peerId, userName);
             rooms[roomId][peerId] = { peerId, userName };
             socket.join(roomId);
             socket.to(roomId).emit("user-joined", { peerId, userName });
         } else {
+            // tslint:disable-next-line:no-console
             console.log("user requesting to join room", roomId);
             socket.join(roomId);
         }
@@ -64,6 +67,7 @@ export const roomHandler = (socket: Socket) => {
 
         socket.on("disconnect", () => {
             if (peerId) {
+                // tslint:disable-next-line:no-console
                 console.log("user left the room", peerId);
                 leaveRoom({ roomId, peerId });
             }
@@ -76,6 +80,7 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const startSharing = ({ peerId, roomId }: IRoomParams) => {
+        // tslint:disable-next-line:no-console
         console.log({ roomId, peerId });
         socket.to(roomId).emit("user-started-sharing", peerId);
     };
@@ -85,6 +90,7 @@ export const roomHandler = (socket: Socket) => {
     };
 
     const addMessage = (roomId: string, message: IMessage) => {
+        // tslint:disable-next-line:no-console
         console.log({ message });
         if (chats[roomId]) {
             chats[roomId].push(message);
